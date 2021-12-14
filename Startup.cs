@@ -84,7 +84,7 @@ namespace Bookmanagementapi
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider svp)
         {
             if (env.IsDevelopment())
             {
@@ -104,6 +104,32 @@ namespace Bookmanagementapi
             {
                 endpoints.MapControllers();
             });
+
+            MigrateDatabaseContexts(svp);
+            CreateDefaultRolesAsync(svp).GetAwaiter().GetResult();
+        }
+
+        public void MigrateDatabaseContexts(IServiceProvider svp)
+         {
+             var applicationDbContext = svp.GetRequiredService<AppDbContext>();
+             applicationDbContext.Database.Migrate();
+         }
+        public async Task CreateDefaultRolesAsync(IServiceProvider svp) 
+        {
+            string[] roles = new string[] {"SystemAdministrator", "User"};
+
+            var roleManager = svp.GetRequiredService<RoleManager<IdentityRole>>();
+
+            foreach (var role in roles)
+            {
+                var roleExists = await roleManager.RoleExistsAsync(role);
+                if (!roleExists)
+                {
+                    await roleManager.CreateAsync(new IdentityRole{Name = role});
+                }
+            }
+
+            
         }
     }
 }
