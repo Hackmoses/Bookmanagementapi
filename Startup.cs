@@ -1,6 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using System.Text;
 using System.Threading.Tasks;
 using Bookmanagementapi.Configuration;
@@ -8,14 +7,11 @@ using Bookmanagementapi.data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -48,6 +44,7 @@ namespace Bookmanagementapi
             
             services.AddDbContext<AppDbContext>(options => options.UseSqlServer(ConnectionString));
 
+            
            
             services.AddAuthentication(option =>
             {
@@ -75,6 +72,7 @@ namespace Bookmanagementapi
                    
 
             });
+            
 
             services.AddDefaultIdentity<IdentityUser> (options
                              => options.SignIn.RequireConfirmedAccount = true)
@@ -82,6 +80,33 @@ namespace Bookmanagementapi
             
             
         }
+        // Creating a deafult application user
+
+        /* private async Task CreateUserRoles( UserManager<ApplicationUser> userManager)
+            {
+
+                var UserManager = userManager;
+
+                //Assign Admin role to the main User here we have given our newly registered 
+                //login id for Admin management
+                ApplicationUser user = await UserManager.FindByEmailAsync("test@test.com");
+                UserManager.AddToRoleAsync(user, "Admin").GetAwaiter().GetResult();
+            }
+
+             public class IdentityHostingStartup : IHostingStartup
+            {
+            public void Configure(IWebHostBuilder builder)
+            {
+             builder.ConfigureServices((context, services) => {
+            services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(
+                    context.Configuration.GetConnectionString("ApplicationDBContextConnection")));
+
+            services.AddDefaultIdentity<ApplicationUser>()
+                .AddEntityFrameworkStores<AppDbContext>();
+            });
+             } */
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider svp)
@@ -105,8 +130,9 @@ namespace Bookmanagementapi
                 endpoints.MapControllers();
             });
 
-            MigrateDatabaseContexts(svp);
-            CreateDefaultRolesAsync(svp).GetAwaiter().GetResult();
+           //When creating a default role uncomment this line of code below.
+           //CreateDefaultRolesAsync(svp).GetAwaiter().GetResult(); 
+           MigrateDatabaseContexts(svp);
         }
 
         public void MigrateDatabaseContexts(IServiceProvider svp)
@@ -114,7 +140,9 @@ namespace Bookmanagementapi
              var applicationDbContext = svp.GetRequiredService<AppDbContext>();
              applicationDbContext.Database.Migrate();
          }
-        public async Task CreateDefaultRolesAsync(IServiceProvider svp) 
+
+         //If you want to create a default role you can uncomment the code below
+        /*public async Task CreateDefaultRolesAsync(IServiceProvider svp) 
         {
             string[] roles = new string[] {"SystemAdministrator", "User"};
 
@@ -129,7 +157,9 @@ namespace Bookmanagementapi
                 }
             }
 
+
+
             
-        }
+        } */
     }
 }
